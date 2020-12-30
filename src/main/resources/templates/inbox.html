@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css"
+	integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/"
+	crossorigin="anonymous">
+<link rel="stylesheet"
+	href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+	integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+	crossorigin="anonymous">
+<link rel="stylesheet"
+	href="https://use.fontawesome.com/releases/v5.6.3/css/all.css"
+	integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/"
+	crossorigin="anonymous">
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+	integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+	crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+	integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+	crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+	integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+	crossorigin="anonymous"></script>
+
+<meta charset="UTF-8">
+<title th:text="'PAMP - ' + ${unreadMessages.size()} + ' neue Nachrichten'">PAMP -
+	Nachrichten</title>
+</head>
+<body>
+
+	<div th:replace="fragments/header :: header"></div>
+
+
+	<div class="container">
+		<div class="jumbotron">
+			<!-- Überschrift: Sie haben x Nachrichten -->
+			<h2>
+				<span th:text="'Sie haben ' + ${unreadMessages.size()} + ' ungelesene Nachrichten'">Ungelesene
+					Nachrichten!</span>
+			</h2>
+
+			<!-- Zeilenüberschriften-->
+			<div class="row mb-1 mt-5">
+				<div class="col-1">
+					<!-- leer -->
+				</div>
+
+				<div class="col-5 ml-3">
+					<b><u><span>Titel</span></u></b>
+				</div>
+
+				<div class="col-5 d-flex justify-content-end">
+					<b><u><span>Absender</span></u></b>
+				</div>
+			</div>
+
+			<!-- Schleife über alle ungelesenen Nachrichten -->
+			<ul class="list-group" style="list-style-type: none;">
+				<li th:each="message : ${unreadMessages}" style="border: 1px black">
+					<!-- Link --> <a th:href="@{/viewMessage(messageId=${message.messageId})}"
+					class="list-group-item mb-1 list-group-item-action active" style="border-color: black">
+						<div class="row">
+							<!-- Gelesen/Ungelesen -->
+							<div class="col-1">
+								<span class="fas fa-envelope"></span>
+							</div>
+
+							<!-- Titel -->
+							<div class="col-5">
+								<b><span th:text="${message.title}">Titel</span></b>
+							</div>
+
+							<!-- Absender -->
+							<div class="col-6 d-flex justify-content-end">
+								<b><span th:text="${message.senderName}">E-Mail</span></b>
+							</div>
+						</div>
+				</a>
+				</li>
+
+				<!-- Schleife über alle gelesenen Nutzer -->
+				<li th:each="message : ${readMessages}" style="border: 1px black">
+					<!-- Link --> <a th:href="@{/viewMessage(messageId=${message.messageId})}"
+					class="list-group-item mb-1 list-group-item-action active"
+					style="background: deepskyblue; border-color: black">
+						<div class="row">
+							<!-- Gelesen/Ungelesen -->
+							<div class="col-1">
+								<span class="far fa-envelope-open"></span>
+							</div>
+
+							<!-- Vorname & Nachname -->
+							<div class="col-5">
+								<span th:text="${message.title}">Titel</span>
+							</div>
+
+							<!-- E-Mail -->
+							<div class="col-6 d-flex justify-content-end">
+								<span th:text="${message.senderName}">E-Mail</span>
+							</div>
+						</div>
+				</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+
+	<!-- Fußzeile -->
+	<div th:replace="fragments/footer :: footer"></div>
+
+</body>
+</html>

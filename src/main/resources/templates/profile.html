@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
+<head>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+	integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css"
+	integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+	crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+	integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+	integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+<meta charset="UTF-8">
+<title>Profil</title>
+<style>
+#profilePicture {
+	border-radius: 70%;
+}
+</style>
+</head>
+<body>
+
+	<div th:replace="fragments/header :: header"></div>
+
+	<div class="container">
+		<div class="jumbotron">
+
+			<!-- 1.Zeile: Profilbild und Angaben zur Person-->
+			<div class="row justify-content-center">
+				<!-- linke Spalte -->
+				<div class="col">
+					<!-- Bild -->
+					<div class="row mb-1 justify-content-center">
+						<img id="profilePicture" th:if="${nutzer.profilbild != null}" th:src="${nutzer.profilbild}" height="300" width="300"> <img
+							id="profilePicture" th:if="${nutzer.profilbild == null}" th:src="@{/img/defaultProfilePicture.png}" height="300" width="300">
+					</div>
+
+					<!-- Ändern - Knopf -->
+					<div class="row justify-content-center">
+						<button th:if="${isUserLocked} == FALSE" type="button" class="btn btn-secondary" data-toggle="modal" data-target="#profilbildModal">Profilbild ändern</button>
+					</div>
+				</div>
+
+				<!-- rechte Spalte -->
+				<div class="col">
+					<br>
+
+					<!-- Überschrift -->
+					<h5>
+						<span>Angaben zu Ihrer Person:</span>
+					</h5>
+
+					<!-- Vorname -->
+					<div class="row p-2">
+						<div class="col-md-12">
+							<span><b>Vorname:</b></span> <span th:text="${nutzer.vorname}">Vorname</span>
+							<button th:if="${isUserLocked} == FALSE" type="button" class="btn btn-secondary" style="border-radius: 100%; margin-left: 5px" data-toggle="modal" data-target="#vornameModal">
+								<i class="fas fa-pen"></i>
+							</button>
+						</div>
+
+						<div class="alert alert-danger" th:if="${emptyvorname}">
+							<p class="text text-center">Eingabe darf nicht leer sein.</p>
+						</div>
+					</div>
+
+					<!-- Nachname -->
+					<div class="row p-2">
+						<div class="col-md-12">
+							<span><b>Nachname:</b></span> <span th:text="${nutzer.nachname}">Nachname</span>
+							<button th:if="${isUserLocked} == FALSE" type="button" class="btn btn-secondary" style="border-radius: 100%; margin-left: 5px" data-toggle="modal" data-target="#nachnameModal">
+								<i class="fas fa-pen"></i>
+							</button>
+						</div>
+
+						<div class="alert alert-danger" th:if="${emptynachname}">
+							<p class="text text-center">Eingabe darf nicht leer sein.</p>
+						</div>
+					</div>
+
+					<!-- Geburtsdatum -->
+					<div class="row p-2">
+						<div class="col-md-12">
+							<span><b>Geburtsdatum:</b></span> <span th:text="${nutzer.getFormattedGeburtsdatum()}">Geburtsdatum</span>
+							<button th:if="${isUserLocked} == FALSE" type="button" class="btn btn-secondary" style="border-radius: 100%; margin-left: 5px" data-toggle="modal"
+								data-target="#geburtsdatumModal">
+								<i class="fas fa-pen"></i>
+							</button>
+						</div>
+
+						<div class="alert alert-danger" th:if="${emptydate}">
+							<p class="text text-center">Eingabe darf nicht leer sein.</p>
+						</div>
+					</div>
+
+					<!-- Rating -->
+					<div class="row-md-12">
+						<div class="col-md-12">
+							<div th:replace="fragments/ratingScala :: ratingScala"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Profilbild modal -->
+			<div class="modal fade" id="profilbildModal" tabindex="-1" role="dialog" aria-labelledby="profilbildModalLabel" aria-hidden="true">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title" id="profilbildModalLabel">Profilbild ändern</h5>
+						</div>
+						<form class="md-form" action="#" th:action="@{/profile}" method="post" enctype="multipart/form-data">
+							<div class="modal-body">
+								<input type="file" name="image">
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-secondary" data-dismiss="modal">Abbrechen</button>
+								<input class="btn btn-primary" value="Hochladen" name="Hochladen" type="submit">
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+
+			<div class="alert alert-danger" th:if="${noimage}">
+				<p class="text text-center">Es sind nur BMP, GIF, JPG und PNG Dateien erlaubt.</p>
+			</div>
+
+			<div class="alert alert-danger" th:if="${tobig}">
+				<p class="text text-center">Maximale Bildgröße: 800 x 800 Pixel.</p>
+			</div>
+
+			<hr>
+
+			<!-- Wohnort/Lieferadresse -->
+			<!-- Überschrift mit Knopf -->
+			<h5>
+				<span>Wohnort bzw. Lieferadresse:</span>
+
+				<!-- Button zum Ändern des Wohnorts -->
+				<button th:if="${isUserLocked} == FALSE" type="button" class="btn btn-secondary ml-2" style="border-radius: 100%; margin-left: 5px" data-toggle="modal" data-target="#wohnortModal">
+					<i class="fas fa-pen"></i>
+				</button>
+			</h5>
+
+			<div class="row p-2">
+				<!-- Plz -->
+				<div class="col-md-4">
+					<span><b>Postleitzahl:</b></span> <span th:text="${nutzer.plz}">Plz</span>
+				</div>
+
+				<!-- Stadt -->
+				<div class="col-md-4">
+					<span><b>Stadt:</b></span> <span th:text="${nutzer.stadt}">Stadt</span>
+				</div>
+
+				<!-- Adresse -->
+				<div class="col-md-4">
+					<span><b>Adresse:</b></span> <span th:text="${nutzer.adresse}">Adresse</span>
+				</div>
+			</div>
+
+			<div class="alert alert-danger" th:if="${emptyadresse}">
+				<p class="text text-center">unvollständige Angaben</p>
+			</div>
+
+			<div class="text text-danger" th:if="${invalidPLZ}">
+				<p class="text text-danger">keine gültige Postleitzahl</p>
+			</div>
+
+			<DIV class="row p-2">
+				<!-- Google Maps -->
+				<DIV class="col-md-6" th:replace="fragments/googleMaps :: googleMaps"></DIV>
+			</DIV>
+
+			<hr>
+
+			<!-- Account verwalten -->
+			<!-- Überschrift -->
+			<h5>
+				<span>Account verwalten:</span>
+			</h5>
+
+			<div class="row p-2">
+
+				<!-- E-Mail -->
+				<div class="col-md-6">
+					<span><b>E-Mail:</b></span> <span th:text="${nutzer.email}">E-Mail</span>
+				</div>
+
+				<!-- Passwort -->
+				<div class="col-md-6">
+					<button th:if="${isUserLocked} == FALSE" type="button" class="btn btn-danger" data-toggle="modal" data-target="#passwortModal">
+						<span>Passwort ändern <i class="fas fa-unlock"></i></span>
+					</button>
+				</div>
+
+				<div class="alert alert-danger" th:if="${emptypassword}">
+					<p class="text text-center">Eingabe darf nicht leer sein</p>
+				</div>
+
+				<div class="alert alert-danger" th:if="${invalidPasswordOld}">
+					<p class="text text-center">aktuelles Passwort ungültig</p>
+				</div>
+
+				<div class="alert alert-danger" th:if="${invalidPasswordNew}">
+					<p class="text text-center">neues Passwort ungültig</p>
+				</div>
+
+				<div class="alert alert-danger" th:if="${unequalPasswords}">
+					<p class="text text-center">Passwörter nicht identisch</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Modals -->
+	<div class="modal fade" id="vornameModal" tabindex="-1" role="dialog" aria-labelledby="vornameModalLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="vornameModalLabel">Vorname ändern</h5>
+				</div>
+				<form action="#" th:action="@{/profile}" method="post">
+					<div class="modal-body">
+						<div class="form-group">
+							<label for="vornameEingabe" class="col-form-label">Vorname: </label> <input type="text" class="form-control" name="u_vorname"
+								th:value="${nutzer.vorname}" id="vornameEingabe">
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Abbrechen</button>
+						<button type="submit" name="vorname" value="vorname" class="btn btn-primary">Speichern</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="nachnameModal" tabindex="-1" role="dialog" aria-labelledby="nachnameModalLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="nachnameModalLabel">Nachname ändern</h5>
+				</div>
+				<form action="#" th:action="@{/profile}" method="post">
+					<div class="modal-body">
+						<div class="form-group">
+							<label for="nachnameEingabe" class="col-form-label">Nachname: </label> <input type="text" class="form-control" name="u_nachname"
+								th:value="${nutzer.nachname}" id="nachnameEingabe">
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Abbrechen</button>
+						<button type="submit" name="nachname" value="nachname" class="btn btn-primary">Speichern</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="geburtsdatumModal" tabindex="-1" role="dialog" aria-labelledby="geburtsdatumModalLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="geburtsdatumModalLabel">Geburtsdatum ändern</h5>
+				</div>
+				<form action="#" th:action="@{/profile}" method="post">
+					<div class="modal-body">
+						<div class="form-group">
+							<label for="geburtsdatumEingabe" class="col-form-label">Geburtsdatum: </label> <input type="date" class="form-control" name="u_geburtsdatum"
+								id="geburtsdatumEingabe">
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Abbrechen</button>
+						<button type="submit" name="geburtsdatum" value="geburtsdatum" class="btn btn-primary">Speichern</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="wohnortModal" tabindex="-1" role="dialog" aria-labelledby="wohnortModalLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="wohnortModalLabel">Wohnort/Lieferadresse ändern</h5>
+				</div>
+				<form action="#" th:action="@{/profile}" method="post">
+					<div class="modal-body">
+						<div class="form-group">
+							<label for="plzEingabe" class="col-form-label">Plz: </label> <input type="text" name="u_plz" th:value="${nutzer.plz}" class="form-control"
+								id="plzEingabe"> <label for="stadtEingabe" class="col-form-label">Stadt: </label> <input type="text" name="u_stadt"
+								th:value="${nutzer.stadt}" class="form-control" id="stadtEingabe"> <label for="adresseEingabe" class="col-form-label">Adresse:
+							</label> <input type="text" name="u_adresse" th:value="${nutzer.adresse}" class="form-control" id="adresseEingabe">
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Abbrechen</button>
+						<button type="submit" name="adresse" value="adresse" class="btn btn-primary">Speichern</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="passwortModal" tabindex="-1" role="dialog" aria-labelledby="passwortModalLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="passwortModalLabel">Passwort ändern</h5>
+				</div>
+				<form action="#" th:action="@{/profile}" method="post">
+					<div class="modal-body">
+						<div class="form-group">
+							<label for="passwortEingabeAlt" class="col-form-label">Passwort: </label> <input type="password" name="u_passwortalt" class="form-control"
+								id="passwortEingabeAlt"> <label for="passwortEingabe" class="col-form-label">Neues Passwort: </label> <input type="password"
+								name="u_passwortneu" class="form-control" id="passwortEingabe"> <label for="passwortEingabeRE" class="col-form-label"> Neues
+								Passwort erneut eingeben: </label> <input type="password" name="u_passwortneure" class="form-control" id="passwortEingabeRE">
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Abbrechen</button>
+						<button type="submit" name="passwort" value="passwort" class="btn btn-primary">Speichern</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	</div>
+
+	<!-- Fußzeile -->
+	<div th:replace="fragments/footer :: footer"></div>
+
+</body>
+</html>

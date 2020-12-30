@@ -1,0 +1,48 @@
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="googleMaps" style="width: 800px; margin: 0 auto;">
+	<div style="width: auto; height: 250px;" id="map"></div>
+	<script th:inline="javascript" type="text/javascript">
+		/*<![CDATA[*/	
+		var map;
+		var marker;
+		var radius = /*[[${googleMapsRadius}]]*/
+		var zoom = /*[[${googleMapsZoom}]]*/;
+		var myLatLng = {lat: /*[[${lat}]]*/, lng: /*[[${lng}]]*/};
+		var locations = /*[[${locationList}]]*/;
+		var markers = /*[[${googleMarkers}]]*/;
+		/*]]>*/
+		
+		function initMap() {
+			map = new google.maps.Map(document.getElementById('map'), {
+				center : myLatLng,
+				zoom : zoom
+			});
+			
+			if(radius > 0) {
+				var Circle = new google.maps.Circle({
+					strokeColor : '#FF0000',
+		            strokeOpacity : 0.8,
+		            strokeWeight : 2,
+		            fillColor : '#FF0000',
+		            fillOpacity : 0.35,
+		            map : map,
+		            center : myLatLng,
+					radius : radius
+				});
+			} 
+			
+			for(i = 0; i < markers.length; i++) {
+				if(markers[i] != null) {
+					marker = new google.maps.Marker({
+						position : markers[i].mt_markerPosition,
+						map : map,
+						title : markers[i].mv_markerTitle
+					});
+				}
+			}
+		}
+	</script>
+
+	<script async="async" defer="defer" th:src="@{https://maps.googleapis.com/maps/api/js(key=${API_KEY},callback=initMap)}"></script>
+</div>

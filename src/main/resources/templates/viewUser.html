@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+
+
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+		  integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css"
+		  integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+			crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+			integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+			integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+
+	<meta charset="UTF-8">
+	<style>
+		#profilePicture {
+			border-radius: 50%;
+		}
+	</style>
+	<title th:text="'PAMP -' + ${nutzer.vorname} + ' ' + ${nutzer.nachname}">User betrachten</title>
+</head>
+<body>
+
+<div th:replace="fragments/header :: header"></div>
+
+
+<!-- content -->
+<div class="container">
+	<div class="jumbotron">
+		<!-- Überschrift -->
+		<h2>
+			<span th:text="'Profil von ' + ${nutzer.vorname} + ' ' + ${nutzer.nachname}">Profil von unknown</span>
+		</h2>
+		<br>
+
+		<div class="row justify-content-center">
+			<!-- linke Spalte -->
+			<div class="col">
+				<!-- Bild -->
+				<div class="row mb-1 justify-content-center">
+					<img id="profilePicture" th:if="${nutzer.profilbild != null}" th:src="${nutzer.profilbild}" height="300" width="300">
+					<img id="profilePicture" th:if="${nutzer.profilbild == null}" th:src="@{/img/defaultProfilePicture.png}" height="300" width="300">
+				</div>
+			</div>
+
+			<!-- rechte Spalte -->
+			<div class="col">
+				<br>
+
+				<!-- Überschrift -->
+				<h5><span>Angaben zur Person:</span></h5>
+
+				<!-- Vorname -->
+				<div class="row p-2">
+					<div class="col-md-12">
+						<span><b>Vorname:</b></span> <span th:text="${nutzer.vorname}">Vorname</span>
+					</div>
+				</div>
+
+				<!-- Nachname -->
+				<div class="row p-2">
+					<div class="col-md-12">
+						<span><b>Nachname:</b></span> <span th:text="${nutzer.nachname}">Nachname</span>
+					</div>
+				</div>
+
+				<!-- Geburtsdatum -->
+				<div class="row p-2">
+					<div class="col-md-12">
+						<span><b>Geburtsdatum:</b></span> <span th:text="${nutzer.getFormattedGeburtsdatum()}">Geburtsdatum</span>
+					</div>
+				</div>
+
+				<!-- Rating -->
+				<div class="row-md-12">
+					<div class="col-md-12">
+						<div th:replace="fragments/ratingScala :: ratingScala"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<hr>
+
+		<!-- Wohnort bzw. Lieferadresse -->
+		<div class="container">
+			<!-- Überschrift -->
+			<h5><span>Wohnort bzw. Lieferadresse:</span></h5>
+
+			<div class="row p-2">
+				<!-- Plz -->
+				<div class="col-md-4">
+					<span><b>Postleitzahl:</b></span> <span th:text="${nutzer.plz}">Plz</span>
+				</div>
+
+				<!-- Stadt -->
+				<div class="col-md-4">
+					<span><b>Stadt:</b></span> <span th:text="${nutzer.stadt}">Stadt</span>
+				</div>
+
+				<!-- Adresse -->
+				<div class="col-md-4">
+					<span><b>Adresse:</b></span> <span th:text="${nutzer.adresse}">Adresse</span>
+				</div>
+			</div>
+
+			<DIV class="row p-2">
+				<!-- Google Maps -->
+				<DIV class="col-md-6" th:replace="fragments/googleMaps :: googleMaps"></DIV>
+			</DIV>
+
+		</div>
+
+		<hr>
+
+		<!-- Kontakt -->
+		<div class="container">
+			<!-- Überschrift -->
+			<h5><span>Kontakt:</span></h5>
+
+			<div class="row p-2">
+				<!-- E-Mail -->
+				<div class="col-md-6">
+					<span><b>E-Mail:</b></span> <span th:text="${nutzer.email}">E-Mail</span>
+				</div>
+				<!-- Knopf Kontakt aufnehmen -->
+				<div th:if="${isUserLocked} == FALSE" class="col-md-6">
+					<a class="btn btn-secondary mr-2" th:href="@{/sendMessage(receiverId=${nutzer.email})}" role="button" aria-pressed="true">Kontakt aufnehmen</a>
+				</div>
+			</div>
+		</div>
+
+		<!-- Container für Admin -->
+		<div class="container d-flex justify-content-center" th:if="${isUserAdmin}">
+			<button th:if="${nutzer.sperre} == FALSE" type="button" data-toggle="modal" data-target="#lockModal" class="btn btn-danger mx-1 mt-5">Sperren</button>
+			<button th:if="${nutzer.sperre}" type="button" data-toggle="modal" data-target="#lockModal" class="btn btn-danger mx-1 mt-5">Entsperren</button>
+		</div>
+
+			<!-- Meldungen -->
+			<br> <br> <br>
+			<div class="alert alert-danger" th:if="${noReason}">
+				<p class="text text-center">Begründung fehlt</p>
+			</div>
+			<div class="alert alert-danger" th:if="${noAdmin}">
+				<p class="text text-center">Nur für Administratoren verfügbar</p>
+			</div>
+			<div class="alert alert-danger" th:if="${sendMessageFailed}">
+				<p class="text text-center" th:text="${MessageFailed}">Fehler aus Backend</p>
+			</div>
+			<div class="alert alert-success" th:if="${lockEnabled}">
+				<p class="text text-center">Nutzer wurde gesperrt.</p>
+			</div>
+			<div class="alert alert-success" th:if="${unlockEnabled}">
+				<p class="text text-center">Nutzer wurde entsperrt.</p>
+			</div>
+		</div>
+	</div>
+
+
+	<!-- Pop-Up zur Bestaetigung des Loeschen eines Nutzers -->
+	<div class="modal fade" id="lockModal" tabindex="-1" role="dialog" aria-labelledby="lockModalLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="lockModalLabel" th:if="${nutzer.sperre}">Benutzer wirklich entsperren?</h5>
+					<h5 class="modal-title" id="lockModalLabel" th:if="${nutzer.sperre == false}">Benutzer wirklich sperren?</h5>
+				</div>
+				<form action="#" th:action="@{/lockUser}" method="post">
+					<div class="modal-body">
+						<div class="form-group">
+							<label for="begruendungEingabe" class="col-form-label">Begründung:</label>
+							<textarea name="u_reason" id="begruendungEingabe" class="form-control rows=3"></textarea>
+							<input type="hidden" class="form-control" name="userId" id="lockUserId" th:value="${nutzer.email}" />
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Abbrechen</button>
+						<button type="submit" name="lock" value="lock" class="btn btn-danger" th:if="${nutzer.sperre == false}">Sperren</button>
+						<button type="submit" name="lock" value="lock" class="btn btn-danger" th:if="${nutzer.sperre}">Entsperren</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+
+	<!-- Fußzeile -->
+	<div th:replace="fragments/footer :: footer"></div>
+
+</body>
+</html>

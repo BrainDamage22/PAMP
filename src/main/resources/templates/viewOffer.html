@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+	integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css"
+	integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+	crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+	integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+	integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+<meta charset="UTF-8">
+<title th:text="'PAMP - ' + ${angebot.titel}">Angebot betrachten</title>
+<style>
+img {
+	border-radius: 70%;
+}
+</style>
+</head>
+<body>
+
+	<div th:replace="fragments/header :: header"></div>
+
+	<div class="container">
+		<div class="jumbotron">
+
+			<div th:if="${angebot.kaeufer != null}" class="alert alert-success">
+				<p class="text text-center">Dieses Angebot ist bereits verkauft.</p>
+			</div>
+
+			<div th:if="${buysent}" class="alert alert-success">
+				<p class="text text-center">Kaufanfrage gesendet!</p>
+			</div>
+
+			<div th:if="${buysentfailed}" class="alert alert-success">
+				<p class="text text-center">Etwas ist schief gelaufen. Bitte versuchen sie es erneut.</p>
+			</div>
+
+			<!-- Zeile 1: Überschrift -->
+			<div class="row p-2 justify-content-center">
+				<h1 th:text="${angebot.titel}">Titel</h1>
+			</div>
+
+			<!-- Bilder -->
+			<div class="row justify-content-center">
+				<ul class="list-inline">
+					<li th:each="img : ${images}" class="list-inline-item"><img th:src="${img.getBase64()}" height="200" width="200"></li>
+				</ul>
+			</div>
+
+			<!-- Qualifikationen -->
+			<div class="row p-1 justify-content-center" th:if="${qualifikationen.size() > 0}">
+				<!-- Qualifikationen -->
+				<span>Qualifikationen des Anbieters:</span>
+				<ul class="list-inline">
+					<li class="list-inline-item mr-2 ml-1" th:each="quali : ${qualifikationen}"><i class="fas fa-file-pdf"></i> <a th:text="${quali.getName()}"
+						th:href="@{(${quali.getBase64()})}" target="_blank" style="color: black; text-decoration: none;"></a></li>
+				</ul>
+			</div>
+
+			<hr th:if="${qualifikationen.size() > 0}">
+
+			<div class="container">
+				<div class="row justify-content-center">
+					<!-- linke Spalte -->
+					<div class="col-md-8 mt-2">
+						<div class="container">
+							<i><h5>Zu diesem Produkt</h5></i>
+							<div class="row p-1">
+								<div class="col">
+									<!-- Beschreibung -->
+									<label for="beschreibung">Beschreibung:</label>
+									<TEXTAREA class="form-control rows=3" id="beschreibung" disabled="disabled" th:text="${angebot.beschreibung}"></TEXTAREA>
+								</div>
+							</div>
+
+							<div class="row p-1">
+								<div class="col">
+									<!-- Kategorie -->
+									<span th:text="'Kategorie: ' + ${angebot.angebotsKategorieId.getBezeichnung()}">Kategorie</span>
+								</div>
+							</div>
+
+							<div class="row p-1">
+								<div class="col">
+									<!-- Angebotstyp -->
+									<SPAN th:if="${angebot.offerTypeId == 1}" th:text="'Angebotstyp: Produkt'"></SPAN> <SPAN th:if="${angebot.offerTypeId == 2}"
+										th:text="'Angebotstyp: Dienstleistung'"></SPAN>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- rechte Spalte -->
+					<div class="col-md-4 mt-2">
+						<div class="container">
+							<i><h5>Ort & Preis</h5></i>
+							<div class="row p-1">
+								<div class="col">
+									<!-- Ort -->
+									<span th:text="'PLZ: ' + ${angebot.plz}">PLZ</span>
+								</div>
+							</div>
+
+							<div class="row p-1">
+								<div class="col">
+									<!-- Stadt -->
+									<span th:text="'Stadt: ' + ${angebot.stadt}">Stadt</span>
+								</div>
+							</div>
+
+							<!-- Zeile 4 -->
+							<div class="row p-1">
+								<!-- Kosten -->
+								<div class="col">
+									<span th:text="'Preis: ' + ${angebot.betrag} + ' ' + ${angebot.waehrung}">Betrag und Währung</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Container der nur anderen Nutzern angezeigt wird -->
+			<div class="container mt-2" th:if="${angebot.anbieter != nutzer}">
+				<div class="row justify-content-center">
+					<!-- Knopf: Kontakt aufnehmen -->
+					<a th:if="${isUserLocked} == FALSE" class="btn btn-secondary mr-2 mb-1" th:href="@{/sendMessage(receiverId=${angebot.anbieter.email})}" role="button" aria-pressed="true">Kontakt
+						aufnehmen</a>
+
+					<!-- Knopf: Zeige Nutzerprofil -->
+					<a class="btn btn-secondary mr-2 mb-1" th:href="@{/viewUser(email=${angebot.anbieter.email})}" role="button" aria-pressed="true">Profil des
+						Inserenten</a>
+
+					<!-- Knopf: Kaufen -->
+					<div th:if="${angebot.kaeufer == null} AND ${isUserLocked} == FALSE">
+						<button type="button" data-toggle="modal" data-target="#buyModal" class="btn btn-success">Kaufanfrage senden</button>
+					</div>
+				</div>
+				<div class="row p-1 justify-content-center">
+					<div class="alert alert-danger" th:if="${emptybuy}">
+						<p class="text text-center">Eingabe darf nicht leer sein.</p>
+					</div>
+					<div class="alert alert-danger" th:if="${nomatchbuy}">
+						<p class="text text-center">Passwörter stimmen nicht überein.</p>
+					</div>
+				</div>
+			</div>
+
+			<br> <br>
+
+			<!-- Container der nur dem Besitzer des Artikels gezeigt wird -->
+			<div class="container" th:if="${angebot.anbieter == nutzer && angebot.kaeufer == null}" style="border: 2px solid black; border-color: grey">
+
+				<!-- Überschrift -->
+				<div align="center">
+					<h3 class="mt-3">Verwalten Sie hier Ihr Angebot</h3>
+				</div>
+
+				<div class="row justify-content-center">
+					<span th:text="'Ihr Angebot wurde ' + ${angebot.views} + ' mal angesehen!'">Aufrufanzahl</span>
+				</div>
+
+				<form th:action="@{/viewOffer}" method="post">
+					<ul class="list-inline">
+						<li th:each="tag : ${tags}" class="list-inline-item px-2 mb-2" style="border: 1px solid black; border-radius: 25px;"><span class="ml-2"
+							th:text="${tag.tag}">Titel</span>
+							<div th:if="${isUserLocked} == FALSE" class="btn">
+								<form th:action="@{/viewOffer}" method="post">
+									<input type="hidden" th:value="${tag.tagId}" name="tagid">
+									<button type="submit" name="deltag" class="fa fa-trash" aria-hidden="true"></button>
+								</form>
+							</div></li>
+					</ul>
+				</form>
+
+				<form th:action="@{/viewOffer}" th:object="${tags}" method="post">
+
+					<!-- Tag hinzufügen Input und Knopf -->
+					<div th:if="${isUserLocked} == FALSE" class="row p-1 ml-1 mr-1">
+						<input type="text" class="form-control col-sm-9" name="in_tag" id="inputTag" /> <input type="submit" value="Tag hinzufügen"
+							class="btn btn-primary col-sm-3" />
+					</div>
+
+					<div class="alert alert-danger" th:if="${toomanytags}">
+						<p class="text text-center">Maximale Anzahl an Tags erreicht</p>
+					</div>
+
+					<div class="alert alert-danger" th:if="${exist}">
+						<p class="text text-center">Tag existiert bereits</p>
+					</div>
+
+					<div class="alert alert-danger" th:if="${emptytag}">
+						<p class="text text-center">Eingabe darf nicht leer sein.</p>
+					</div>
+
+				</form>
+				<hr>
+
+
+				<!-- Produktbilder -->
+				<h5>
+					<u><span>Produktbilder hochladen:</span></u>
+				</h5>
+
+				<!-- File Selector und Hochladen Knopf -->
+				<div th:if="${isUserLocked} == FALSE" class="row ml-2">
+					<form class="md-form" action="#" th:action="@{/viewOffer}" method="post" enctype="multipart/form-data">
+						<div class="file-field">
+							<input type="file" name="image"> <input class="btn btn-primary" value="Hochladen" name="Hochladen" type="submit">
+						</div>
+					</form>
+				</div>
+
+				<div class="alert alert-danger" th:if="${tobig}">
+					<p class="text text-center">Maximale Bildgröße: 300 x 300 Pixel.</p>
+				</div>
+				<div class="alert alert-danger" th:if="${maxcount}">
+					<p class="text text-center">Maximale Anzahl an Bildern erreicht.</p>
+				</div>
+				<div class="alert alert-danger" th:if="${noimage}">
+					<p class="text text-center">Es sind nur BMP, GIF, JPG und PNG Dateien erlaubt.</p>
+				</div>
+
+				<hr>
+
+				<!-- Qualifikationen -->
+				<h5>
+					<u><span>Qualifikationen hochladen:</span></u>
+				</h5>
+
+				<!-- File Selector und Hochladen Knopf -->
+				<div th:if="${isUserLocked} == FALSE" class="row ml-2">
+					<form class="md-form" action="#" th:action="@{/viewOffer}" method="post" enctype="multipart/form-data">
+						<div class="file-field">
+							<input type="file" name="quali"> <input class="btn btn-primary" value="Hochladen" name="Qualifikation" type="submit">
+						</div>
+					</form>
+				</div>
+
+				<div class="alert alert-danger" th:if="${emptypdf}">
+					<p class="text text-center">Bitte wählen Sie eine Datei aus.</p>
+				</div>
+				<div class="alert alert-danger" th:if="${nopdf}">
+					<p class="text text-center">Es sind nur PDF Dateien erlaubt.</p>
+				</div>
+				<div class="alert alert-danger" th:if="${toomanyqualis}">
+					<p class="text text-center">Es sind maximal zwei Qualifikationen erlaubt.</p>
+				</div>
+
+				<hr>
+
+				<div class="container">
+					<div th:if="${isUserLocked} == FALSE" class="row p-1 justify-content-center">
+						<!-- Angebot bearbeiten -->
+						<form th:action="@{/}" method="post">
+							<button type="button" data-toggle="modal" data-target="#changeModal" class="btn btn-success mx-1 mb-2">
+								<i class="fas fa-tools"></i> Angebot bearbeiten
+							</button>
+						</form>
+
+						<!-- Angebot löschen -->
+						<form th:action="@{/deleteOffer}" method="post">
+							<button type="button" data-toggle="modal" data-target="#deleteModal" class="btn btn-danger mx-1 mb-2">
+								<i class="fas fa-times-circle"></i> Angebot löschen
+							</button>
+						</form>
+					</div>
+
+
+					<div class="alert alert-danger" th:if="${noAuthority}">
+						<p class="text text-center">Sie können nur eigene Angebote löschen!</p>
+					</div>
+
+					<div class="alert alert-danger" th:if="${passworderror}">
+						<p class="text text-center">Falsches Passwort</p>
+					</div>
+
+					<div class="alert alert-danger" th:if="${isSold}">
+						<p class="text text-center">Angebot ist bereits verkauft</p>
+					</div>
+
+					<div class="alert alert-danger" th:if="${emptychange}">
+						<p class="text text-center">Eingaben dürfen nicht leer sein</p>
+					</div>
+
+					<div class="alert alert-danger" th:if="${invalidPLZ}">
+						<p class="text text-center">Keine gültige Postleitzahl</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- Container, der nur dem Käufer angezeigt wird -->
+			<div class="container" th:if="${angebot.kaeufer == nutzer}">
+
+				<!-- Überschrift -->
+				<div style="text-align: center;">
+					<span> Sie haben dieses Angebot gekauft. </span>
+				</div>
+
+				<!-- Angebot bewerten Knopf-->
+				<form th:if="${isUserLocked} == FALSE" th:action="@{/viewOffer}" method="post">
+					<div class="row p-1 justify-content-center" th:if="${angebot.rating == 0}">
+						<button type="button" data-toggle="modal" data-target="#ratingModal" class="btn btn-secondary">Angebot Bewerten</button>
+					</div>
+					<div class="alert alert-danger" th:if="${emptyrating}">
+						<p class="text text-center">Bewertung darf nicht leer sein!</p>
+					</div>
+				</form>
+			</div>
+
+			<!-- Angebot löschen (Admin) -->
+			<form th:action="@{/deleteOfferAdmin}" method="post">
+				<!-- Container der nur einem Admin zeigen der nicht gleich der ersteller ist -->
+				<div class="container" th:if="${isUserAdmin} AND ${angebot.kaeufer == null} AND ${angebot.anbieter != nutzer}">
+					<div class="container">
+						<!-- Zeile 1 -->
+						<div class="row p-1 justify-content-center">
+							<button type="button" data-toggle="modal" data-target="#deleteModalAdmin" class="btn btn-danger">
+								<i class="fas fa-times-circle"></i> Angebot löschen
+							</button>
+						</div>
+					</div>
+
+					<div class="alert alert-danger" th:if="${sendMessageFailed}">
+						<p class="text text-center" th:text="${MessageFailed}">Falsches Passwort</p>
+					</div>
+
+					<div class="alert alert-danger" th:if="${noReason}">
+						<p class="text text-center">Begründung fehlt</p>
+					</div>
+
+					<div class="alert alert-danger" th:if="${isSold}">
+						<p class="text text-center">Angebot ist bereits verkauft</p>
+					</div>
+				</div>
+			</form>
+		</div>
+
+
+		<!-- Pop-Up zur Bestaetigung des Loeschen eines Angebots -->
+		<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="passwortModalLabel" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="passwortModalLabel">Wollen Sie das Angebot wirklich löschen?</h5>
+					</div>
+					<form action="#" th:action="@{/deleteOffer}" method="post">
+						<div class="modal-body">
+							<div class="form-group">
+								<label for="passwortEingabe" class="col-form-label">Passwort: </label> <input type="password" name="u_passwort" class="form-control"
+									id="passwortEingabe"> <input type="hidden" class="form-control" name="offerId" id="delOfferId" th:value="${angebot.angebotId}" />
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">Abbrechen</button>
+							<button type="submit" name="passwort" value="passwort" class="btn btn-danger">Löschen</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+
+		<!-- Pop-Up zur Bestaetigung des Loeschen eines Angebots (Admin) -->
+		<div class="modal fade" id="deleteModalAdmin" tabindex="-1" role="dialog" aria-labelledby="begruendungModalLabel" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="begruendungModalLabel">Geben Sie einen Grund an</h5>
+					</div>
+					<form action="#" th:action="@{/deleteOfferAdmin}" method="post">
+						<div class="modal-body">
+							<div class="form-group">
+								<label for="begruendungEingabe" class="col-form-label">Begründung:</label>
+								<textarea name="u_reason" id="begruendungEingabe" class="form-control rows=3"></textarea>
+								<input type="hidden" class="form-control" name="offerId" id="delOfferId" th:value="${angebot.angebotId}" />
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">Abbrechen</button>
+							<button type="submit" name="passwort" value="passwort" class="btn btn-danger">Löschen</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+
+		<div class="modal fade" id="buyModal" tabindex="-1" role="dialog" aria-labelledby="buyModalLabel" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="buyModalLabel">Kaufanfrage senden</h5>
+					</div>
+					<form action="#" th:action="@{/viewOffer}" method="post">
+						<div class="modal-body">
+							<div class="form-group">
+								<label for="anfrageEingabe" class="col-form-label">Nachricht</label>
+								<textarea name="nachricht" id="anfrageEingabe" class="form-control rows=3"></textarea>
+								<label for="b_password" class="col-form-label">Passwort</label> <input type="password" class="form-control" name="b_passwort" id="b_password" />
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">Abbrechen</button>
+							<button type="submit" name="passwortbuy" value="passwortbuy" class="btn btn-success">Senden</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+
+		<!-- Pop-Up zum Bewerten eines Angebotes -->
+		<div class="modal fade" id="ratingModal" tabindex="-1" role="dialog" aria-labelledby="ratingModalLabel" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="ratingModalLabel">Angebot bewerten</h5>
+					</div>
+					<form action="#" th:action="@{/viewOffer}" method="post">
+						<div class="modal-body">
+							<div class="form-group">
+								<div class="form-group" align="center">
+									<span>Bewerten Sie dieses Angebot mit 1 bis 5 Sternen</span> <br> <br>
+									<div class="container">
+										<div class="row">
+											<div class="col-2">
+												<span>unzufrieden</span> <i class="far fa-frown"></i>
+											</div>
+
+											<div class="col-8 justify-content-center">
+												<div>
+													<span class="fa-stack" style="margin-right: 3px; margin-left: 3px"><i class="fas fa-star fa-stack-2x" style="color: gold"></i><span
+														class="star-text fa-stack-1x" style="color: black">1</span></span> <span class="fa-stack" style="margin-right: 3px; margin-left: 3px"><i
+														class="fas fa-star fa-stack-2x" style="color: gold"></i><span class="star-text fa-stack-1x" style="color: black">2</span></span> <span
+														class="fa-stack" style="margin-right: 3px; margin-left: 3px"><i class="fas fa-star fa-stack-2x" style="color: gold"></i><span
+														class="star-text fa-stack-1x" style="color: black">3</span></span> <span class="fa-stack" style="margin-right: 3px; margin-left: 3px"><i
+														class="fas fa-star fa-stack-2x" style="color: gold"></i><span class="star-text fa-stack-1x" style="color: black">4</span></span> <span
+														class="fa-stack" style="margin-right: 3px; margin-left: 3px"><i class="fas fa-star fa-stack-2x" style="color: gold"></i><span
+														class="star-text fa-stack-1x" style="color: black">5</span></span> <br> <span class="starRating"> <input id="rating1" type="radio"
+														name="rating" value="1" style="margin-right: 14px; margin-left: 14px"> <label for="rating1"></label> <input id="rating2"
+														type="radio" name="rating" value="2" style="margin-right: 14px; margin-left: 14px"> <label for="rating2"></label> <input
+														id="rating3" type="radio" name="rating" value="3" style="margin-right: 14px; margin-left: 14px"> <label for="rating3"></label> <input
+														id="rating4" type="radio" name="rating" value="4" style="margin-right: 14px; margin-left: 14px"> <label for="rating4"></label> <input
+														id="rating5" type="radio" name="rating" value="5" style="margin-right: 14px; margin-left: 15px"> <label for="rating5"></label>
+													</span>
+												</div>
+											</div>
+
+											<div class="col-2">
+												<span>sehr zufrieden</span> <i class="far fa-smile"></i>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">Abbrechen</button>
+							<button type="submit" name="rating" value="rating" class="btn btn-primary">Senden</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+
+		<!-- Pop up zum Ändern eines Angebotes -->
+		<div class="modal fade" id="changeModal" tabindex="-1" role="dialog" aria-labelledby="ratingModalLabel" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="changeModalLabel">Angebot bearbeiten</h5>
+					</div>
+					<form action="#" th:action="@{/viewOffer}" method="post">
+						<div class="modal-body">
+							<div class="form-group">
+								<label for="titel" class="col-form-label">Titel</label> <input type="text" th:value="${angebot.titel}" class="form-control" name="u_titel"
+									id="titel" /> <label for="betrag" class="col-form-label">Betrag</label> <input type="number" th:value="${angebot.betrag}" min="0.01"
+									step="0.01" class="form-control" name="u_betrag" id="betrag" /> <label for="u_beschreibung" class="col-form-label">Beschreibung</label> <input
+									class="form-control rows=2" id="u_beschreibung" name="u_beschreibung" th:value="${angebot.beschreibung}" type="text" /> <label
+									for="kategorie" class="form-control-label">Kategorie</label> <select name="u_kategorie" class="form-control" id="kategorie">
+									<option th:each="cat : ${allOfferTypes}" th:value="${cat.angebotsKategorieId}" th:text="${cat.bezeichnung}"
+										th:selected="${cat.isSelected(angebot.getAngebotsKategorieId().getAngebotsKategorieId())}">Wireframe</option>
+								</select> <label for="plz" class="col-form-label">Postleitzahl</label> <input type="text" th:value="${angebot.plz}" class="form-control" name="u_plz"
+									id="plz" /> <label for="stadt" class="col-form-label">Stadt</label> <input type="text" th:value="${angebot.stadt}" class="form-control"
+									name="u_stadt" id="stadt" />
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">Abbrechen</button>
+							<button type="submit" name="change" value="change" class="btn btn-primary">Ändern</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<!-- Fußzeile -->
+	<div th:replace="fragments/footer :: footer"></div>
+</body>
+</html>

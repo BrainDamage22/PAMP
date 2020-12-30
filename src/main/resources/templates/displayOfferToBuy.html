@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+	integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css"
+	integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+	crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+	integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+	integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+<meta charset="UTF-8">
+<title th:text="'PAMP - ' + ${angebot.titel}">Angebot betrachten</title>
+
+</head>
+<body>
+
+	<div th:replace="fragments/header :: header"></div>
+
+	<div class="container">
+		<div class="jumbotron">
+			<!-- Zeile 1: Überschrift -->
+			<div class="row p-2 justify-content-center">
+				<h1 th:if="${authorized}" th:text="${angebot.titel}">Titel</h1>
+			</div>
+
+			<div class="row p-1 justify-content-center">
+				<span th:if="${selfOffer} and ${authorized}">Eigene Angebote können nicht gekauft werden!</span>
+			</div>
+
+			<div class="row p-1 justify-content-center">
+				<span th:if="${authorized == false}">Fehlende Berechtigung</span>
+			</div>
+
+			<div th:if="${selfOffer == false} and ${authorized}">
+				<!-- Zeile 2 -->
+				<div class="row p-1">
+					<div class="col">
+						<!-- Titel -->
+						<span th:text="${angebot.titel}">Titel</span>
+					</div>
+
+					<div class="col">
+						<!-- Beschreibung -->
+						<span th:text="${angebot.beschreibung}">Beschreibung</span>
+					</div>
+				</div>
+
+				<!-- Zeile 3 -->
+				<div class="row p-1">
+					<!-- Produktbilder -->
+					<div class="col">
+						<span>Produktbilder: (max 4)</span>
+					</div>
+
+					<!-- Qualifikationen -->
+					<div class="col">
+						<span>Qualifikationen: (max 2)</span>
+					</div>
+				</div>
+
+				<!-- Zeile 3.5 -->
+				<div class="row p-1">
+					<!-- Angebotstyp -->
+					<div class="col">
+						<span th:text="${angebot.typ}">Typ</span>
+					</div>
+
+					<!-- Angebotskategorie -->
+					<div class="col">
+						<span th:text="${angebot.angebotsKategorieId.getBezeichnung()}">Kategorie</psan>
+					</div>
+				</div>
+
+				<DIV class="row p-1">
+					<!-- Angebots-PLZ -->
+					<div class="col">
+						<span th:text="${angebot.plz}">PLZ</span>
+					</div>
+
+					<!-- Angebots-Stadt -->
+					<div class="col">
+						<span th:text="${angebot.stadt}">Stadt</span>
+					</div>
+				</DIV>
+
+				<!-- Zeile 4 -->
+				<div class="row p-1">
+					<!-- Betrag -->
+					<div class="col">
+						<span th:text="${angebot.betrag}">Betrag</span>
+					</div>
+
+					<!-- Währung -->
+					<div class="col">
+						<span th:text="${angebot.waehrung}">Währung</span>
+					</div>
+				</div>
+
+				<form th:action="@{/displayOfferToBuy}" th:object="${nutzer}" method="post">
+					<div class="row p-1" th:if="${sold} == false">
+						<br> <span>Zur Bestätigung erforderlich:</span>
+					</div>
+
+					<!-- Zeile 7 -->
+					<div class="row p-1">
+						<div class="col" th:if="${sold} == false">
+							<label for="password" class="form-control-label">Passwort</label> <input type="password" class="form-control" id="password"
+								th:field="${nutzer.password}" />
+						</div>
+						<div class="col" th:if="${sold} == false">
+							<input type="submit" value="kaufen" class="btn btn-primary ml-2 col-3" />
+						</div>
+						<div class="col" th:if="${sold}">
+							<a class="btn btn-primary mr-2" th:href="@{/sendMessage(receiverId=${angebot.anbieter.email})}" role="button" aria-pressed="true">Kontakt
+								aufnehmen</a>
+						</div>
+					</div>
+
+					<!-- Zeile 8 -->
+					<div class="row p-1">
+						<div class="col">
+							<div class="alert alert-danger" th:if="${nomatch}">
+								<p class="text text-center">Passwort ungültig</p>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+
+			<!-- Messages -->
+			<div class="alert alert-success" th:if="${sold}">
+				<p class="text text-center">Artikel bereits gekauft!</p>
+			</div>
+		</div>
+	</div>
+	<!-- Carousel test ------------------------------------------------------------ -->
+	<div class="container">
+		<div id="myCarousel" class="carousel slide" data-ride="carousel">
+			<!-- Indicators -->
+			<ol class="carousel-indicators">
+				<li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+				<li data-target="#myCarousel" data-slide-to="1"></li>
+				<li data-target="#myCarousel" data-slide-to="2"></li>
+			</ol>
+
+			<!-- Wrapper for slides -->
+			<div class="carousel-inner" role="listbox">
+				<div class="item active">
+					<img src="../static/Logoklein.png" alt="Test Bild">
+				</div>
+
+				<div class="carousel-item">
+					<img src="../static/Logo.png" alt="Test 2">
+				</div>
+
+				<div class="carousel-item">
+					<img src="" alt="Test 3">
+				</div>
+			</div>
+
+			<!-- Left and right controls -->
+			<a class="left carousel-control" href="#myCarousel" role="button" data-slide="prev"> <span>links</span> <span class="sr-only">Previous</span>
+			</a> <a class="right carousel-control" href="#myCarousel" role="button" data-slide="next"> <span>rechts</span> <span class="sr-only">Next</span>
+			</a>
+		</div>
+	</div>
+	<!-- -------------------------------------------------------------------------- -->
+
+	<!-- Fußzeile -->
+	<div th:replace="fragments/footer :: footer"></div>
+
+</body>
+</html>
